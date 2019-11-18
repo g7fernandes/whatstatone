@@ -16,3 +16,5 @@ It will save as output bar charts of accumulative messages or words exchanged.
 Requirements:
 python 3 with matplotlib, numpy and pandas (you can get it all with Anaconda Python or used pip module per module)
 ffmpeg 
+
+![Alt text](video_example.png)
