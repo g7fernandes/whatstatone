@@ -10,3 +10,9 @@ How it works
 - Rename the files with nice names. It will be used to label the bar chart. Do not use names with over 50 characters. 
 - Put all exported .txt files inside a folder named "msg" in the *same directory where main.py is* !
 - Run main.py 
+
+It will save as output bar charts of accumulative messages or words exchanged. 
+
+Requirements:
+python 3 with matplotlib, numpy and pandas (you can get it all with Anaconda Python or used pip module per module)
+ffmpeg 
