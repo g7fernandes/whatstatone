@@ -12,7 +12,8 @@ def nome(p):
     while p[i][-1] != ":":
         nome = nome + p[i] + " "
         i += 1
-        if (len(p)) >= i:
+        if i >= (len(p)):
+            i = i-1
             break
     
     if p[i][-1] == ":":
@@ -111,7 +112,7 @@ p2 = []
 ans = input("Make graph [y/n]? ")
 while ans == "y" or ans == "Y":
     ans = input("A graph of messages per day will be build.\nEnter a interval to average [1]: ")
-    if ans == " ":
+    if ans == "":
         ans = 1
         p1 = nmsg1
         p2 = nmsg2
