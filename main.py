@@ -9,89 +9,107 @@ import matplotlib.animation as animation
 from IPython.display import HTML
 import random
 
-print("In order to save the animation, you must have ffmpeg installed! \n")
-print("Export .txt conversation backup files from whatsapp, \nname them with the name of the person with of each backup and put in a folder named 'msg'.")
+a = '2'
+if os.path.exists('concat.csv'):
+    print("The file with quantity of messages or words concat.csv exists.\n")
+    while a != "1" and a != "0":  
+        a = input("Do you wish to use this file [0] or read again files at \"msg\" folder [1]?\nEnter 1 or 0: ")
+    
+if a == '1':
+    print("In order to save the animation, you must have ffmpeg installed! \n")
+    print("Export .txt conversation backup files from whatsapp, \nname them with the name of the person with of each backup and put in a folder named 'msg'.")
 
-# Language of the smatphone. Important to read date and time correctly.
+    # Language of the smatphone. Important to read date and time correctly.
 
-ling = int(input('In which language was the smatphone? Enter 1 for PT or EN, enter 2 for DE, enter 3 for FR.\n'))
-aux1 = 0
-if ling == 3:
-    aux1 = 1
+    ling = int(input('In which language was the smatphone? Enter 1 for PT or EN, enter 2 for DE, enter 3 for FR.\n'))
+    aux1 = 0
+    if ling == 3:
+        aux1 = 1
 
-print("The name of the people in the chat must have less than 50 characters, if not, will not work properly.\n")
+    print("The name of the people in the chat must have less than 50 characters, if not, will not work properly.\n")
 
-criterio = "messages"
-aux2 = input("Use number of messages [1] or number of words [2] in the graph?\nEnter 1 or 2: ")
-if aux2 == "2":
-    criterio = "words"
+    criterio = "messages"
+    aux2 = input("Use number of messages [1] or number of words [2] in the graph?\nEnter 1 or 2: ")
+    if aux2 == "2":
+        criterio = "words"
 
-# Find the directory where the files are
-people = os.listdir('msg')
+    # Find the directory where the files are
+    people = os.listdir('msg')
 
-# process files
-if os.path.exists('results'):
-    shutil.rmtree('results')
-os.mkdir('results') # create results folder
+    # process files
+    if os.path.exists('results'):
+        shutil.rmtree('results')
+    os.mkdir('results') # create results folder
 
-aux = True
-for person in people:
-    if criterio == "messages":
-        last_date = leitor_msg('msg/' + person, person,ling)
-    else:
-        last_date = leitor_words('msg/' + person, person,ling)
-    if aux:
-        last_datemax = last_date
-        aux = False 
-    if last_datemax < last_date:
-        last_datemax = last_date
-        
-print("All messages computed!\nBuilding Data Frame of cumulative messages...")
+    aux = True
+    for person in people:
+        if criterio == "messages":
+            last_date = leitor_msg('msg/' + person, person,ling)
+        else:
+            last_date = leitor_words('msg/' + person, person,ling)
+        if aux:
+            last_datemax = last_date
+            aux = False 
+        if last_datemax < last_date:
+            last_datemax = last_date
+            
+    print("All messages computed!\nBuilding Data Frame of cumulative messages...")
 
-#%%
-# read cumulative number of messages file to one file 
-print("Filling lacking dates (may take a while)...\n")
-aux = True
-for person in people:
-    if aux: 
-        cum_tot = pd.read_csv('results/' + person[0:len(person)-4] + "_result.csv")
-        aux = False 
-    else:
-        cum_par = pd.read_csv('results/' + person[0:len(person)-4] + "_result.csv")
-        cum_tot = pd.concat([cum_tot,cum_par])
+    #%%
+    # read cumulative number of messages file to one file 
+    print("Filling lacking dates (may take a while)...\n")
+    aux = True
+    for person in people:
+        if aux: 
+            cum_tot = pd.read_csv('results/' + person[0:len(person)-4] + "_result.csv")
+            aux = False 
+        else:
+            cum_par = pd.read_csv('results/' + person[0:len(person)-4] + "_result.csv")
+            cum_tot = pd.concat([cum_tot,cum_par])
 
-del cum_par 
+    del cum_par 
 
-cum_tot = cum_tot.reset_index(drop=True)
+    cum_tot = cum_tot.reset_index(drop=True)
 
-dates = cum_tot['date'].values.tolist() 
-dates = list(dict.fromkeys(dates))
-dates.sort()
+    dates = cum_tot['date'].values.tolist() 
+    dates = list(dict.fromkeys(dates))
+    dates.sort()
 
-i = 1
-while i < len(cum_tot):
-    # enche as datas até o final 
-    if cum_tot['name'][i] != cum_tot['name'][i-1]: # mudou de nome
-        if cum_tot['date'][i-1] != last_date:
+    i = 1
+    while i < len(cum_tot):
+        # enche as datas até o final 
+        if cum_tot['name'][i] != cum_tot['name'][i-1]: # mudou de nome
+            if cum_tot['date'][i-1] != last_date:
+                ld_current = dates.index(cum_tot['date'][i-1])
+                line = cum_tot.iloc[[i-1]].copy()
+                for j in range(ld_current+1, len(dates)):
+                    line['date'] = dates[j]
+                    cum_tot = pd.concat([cum_tot.iloc[:i-1], line, cum_tot.iloc[i:]]).reset_index(drop=True)
+                    i += 1
+        # adiciona datas faltantes
+        else:
             ld_current = dates.index(cum_tot['date'][i-1])
-            line = cum_tot.iloc[[i-1]].copy()
-            for j in range(ld_current+1, len(dates)):
-                line['date'] = dates[j]
+            while dates[ld_current+1] < cum_tot['date'][i]:
+                line = cum_tot.iloc[[i-1]].copy()
+                line['date'] = dates[ld_current + 1]
+                ld_current += 1
                 cum_tot = pd.concat([cum_tot.iloc[:i-1], line, cum_tot.iloc[i:]]).reset_index(drop=True)
                 i += 1
-    # adiciona datas faltantes
-    else:
-        ld_current = dates.index(cum_tot['date'][i-1])
-        while dates[ld_current+1] < cum_tot['date'][i]:
-            line = cum_tot.iloc[[i-1]].copy()
-            line['date'] = dates[ld_current + 1]
-            ld_current += 1
-            cum_tot = pd.concat([cum_tot.iloc[:i-1], line, cum_tot.iloc[i:]]).reset_index(drop=True)
-            i += 1
-    i += 1
+        i += 1
 
 
-cum_tot.to_csv("concat.csv",index=False)
+    cum_tot.to_csv("concat.csv",index=False)
+    
+else:
+    criterio = "messages"
+    aux2 = input("Use number of messages [1] or number of words [2] in the graph?\nEnter 1 or 2: ")
+    if aux2 == "2":
+        criterio = "words"
+    cum_tot = pd.read_csv("concat.csv")
+    dates = cum_tot['date'].values.tolist() 
+    dates = list(dict.fromkeys(dates))
+    dates.sort()   
+
 #%% PLOT #
 # BAR CHART ADAPTAR
 
@@ -125,6 +143,9 @@ cum_tot = pd.concat([cum_tot,group], axis=1)
 
 for i in range(len(cum_tot)):
     cum_tot.at[i,"name"] = cum_tot["name"].iloc[i].replace("_"," ")
+    cum_tot.at[i,"date"] = cum_tot["date"].iloc[i].replace("00","20") # case whastapp exported date in the format yy-mm-dd
+for i in range(len(dates)):
+    dates[i] = dates[i].replace("00","20") # case whastapp exported date in the format yy-mm-dd
 
 group_lk = cum_tot.set_index('name')['group'].to_dict()
 
