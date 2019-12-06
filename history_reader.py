@@ -355,7 +355,7 @@ def leitor_msg_group(fname, ling,tipo):
             for i in range(len(nmsg_out[j])):
                 f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg_out[j][i]))
 
-    print("Saved file {}\n".format(person_name + "_result.csv"))
+        print("Saved file {}\n".format(person_name + "_result.csv"))
 
     with open('membros_list.txt','w') as f:
         for i in range(len(pessoa)):
@@ -493,10 +493,10 @@ def leitor_words_group(fname,ling,tipo):
             for i in range(len(nmsg_out[j])):
                 f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg_out[j][i]))
 
-    print("Saved file {}\n".format(person_name + "_result.csv"))
+        print("Saved file {}\n".format(person_name + "_result.csv"))
 
     with open('membros_list.txt','w') as f:
         for i in range(len(pessoa)):
             f.write(pessoa[i] + "\n")
-            
+
     return(str(lista_dias[-1]))
