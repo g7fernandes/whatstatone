@@ -348,6 +348,11 @@ def leitor_msg_group(fname, ling,tipo):
             for j in range(7,len(nmsg[i])):
                 nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-7]
 
+    if not tipo == "c":
+        for i in range(len(nmsg)):
+            for j in range(2,len(nmsg[i])):
+                nmsg_out[i][j-1] = (nmsg[i][j] + nmsg[i][j-2])
+
     for j in range(len(pessoa)):
         person_name = pessoa[j]
         with open('results/' + person_name +"_result.csv", "w") as f:
@@ -485,6 +490,11 @@ def leitor_words_group(fname,ling,tipo):
         for i in range(len(nmsg)):
             for j in range(7,len(nmsg[i])):
                 nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-7]
+
+    if not tipo == "c":
+        for i in range(len(nmsg)):
+            for j in range(2,len(nmsg[i])):
+                nmsg_out[i][j-1] = (nmsg[i][j] + nmsg[i][j-2])
 
     for j in range(len(pessoa)):
         person_name = pessoa[j]

@@ -139,6 +139,7 @@ if a == '1':
         i += 1
 
 
+    #cum_tot.to_csv("concat.csv")
     cum_tot.to_csv("concat.csv",index=False)
     
 else:
@@ -209,7 +210,7 @@ def draw_barchart(current_date, criterio):
     for i, (value, name) in enumerate(zip(dff['value'], dff['name'])):
         ax.text(value-dx, i,     name,           size=14, weight=600, ha='right', va='bottom')
         ax.text(value+dx, i,     f'{value:,.0f}',  size=14, ha='left',  va='center')
-    ax.text(1, 0.4, current_date, transform=ax.transAxes, color='#777777', size=34, ha='right', weight=800)
+    ax.text(1, 0.4, current_date, transform=ax.transAxes, color='#777777', size=34, va='bottom', ha='right', weight=800)
     ax.text(0, 1.06, criterio, transform=ax.transAxes, size=12, color='#777777')
     ax.xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
     ax.xaxis.set_ticks_position('top')
@@ -248,3 +249,18 @@ print("Saving... (may take a while)\n")
 animator.save(criterio + "_animated_chart.mp4",writer="ffmpeg")
 print("Saved animated_chart.mp4\n")
 # HTML(animator.to_jshtml()) or use animator.to_html5_video() or animator.save()
+
+aux = input("Export database for R [y/n]? ")
+if not aux == "n":
+    cont = 0
+    for current_date in dates:
+        if cont == 0:
+            df2R =  cum_tot[cum_tot['date'].eq(current_date)].sort_values(by='value', ascending=True).tail(10)
+            df2R.insert(0, "index", [1,2,3,4,5,6,7,8,9,10], True)  
+        else: 
+            df2R_aux =  cum_tot[cum_tot['date'].eq(current_date)].sort_values(by='value', ascending=True).tail(10)
+            df2R_aux.insert(0, "index", [1,2,3,4,5,6,7,8,9,10], True) 
+            df2R = pd.concat([df2R, df2R_aux])
+        cont += 1
+
+    df2R.to_csv("database4R.csv")
