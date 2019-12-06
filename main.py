@@ -26,7 +26,7 @@ if os.path.exists('concat.csv'):
 else:
     a = '1'
 
-arc_tipo = "exchanged"
+arc_tipo = " exchanged "
 tipo = "c"
 if a == '1':
     print("In order to save the animation, you must have ffmpeg installed! \n")
@@ -71,7 +71,7 @@ if a == '1':
                 
         print("All messages computed!\nBuilding Data Frame of cumulative messages...")
     elif aux2 == "1":
-        arc_tipo = "sent"
+        arc_tipo = " sent "
         tipo = input("What kind of plot do you want? Enter\nc   for cumulative\nw   for weekly frequency\nq   for biweekly frequency\nm   for monthly\n")
                 # process files
         if os.path.exists('results'):
@@ -196,11 +196,11 @@ group_lk = cum_tot.set_index('name')['group'].to_dict()
 fig, ax = plt.subplots(figsize=(15, 8))
 # função
 if tipo == "w":
-    criterio = criterio + "per week"
+    criterio = criterio + " per week"
 elif tipo == "m":
-    criterio = criterio + "per month"
+    criterio = criterio + " per month"
 elif tipo == "q":
-    criterio = criterio + "per 15 days"
+    criterio = criterio + " per 15 days"
 def draw_barchart(current_date, criterio):
     dff = cum_tot[cum_tot['date'].eq(current_date)].sort_values(by='value', ascending=True).tail(10)
     ax.clear()
