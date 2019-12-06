@@ -26,6 +26,8 @@ if os.path.exists('concat.csv'):
 else:
     a = '1'
 
+arc_tipo = "exchanged"
+tipo = "c"
 if a == '1':
     print("In order to save the animation, you must have ffmpeg installed! \n")
     print("Export .txt conversation backup files from whatsapp, \nname them with the name of the person with of each backup and put in a folder named 'msg'.\n")
@@ -69,7 +71,8 @@ if a == '1':
                 
         print("All messages computed!\nBuilding Data Frame of cumulative messages...")
     elif aux2 == "1":
-
+        arc_tipo = "sent"
+        tipo = input("What kind of plot do you want? Enter\nc   for cumulative\nw   for weekly frequency\nq   for biweekly frequency\nm   for monthly\n")
                 # process files
         if os.path.exists('results'):
             shutil.rmtree('results')
@@ -80,9 +83,9 @@ if a == '1':
         if not os.path.exists(fname):
             print("=== File does not exist! ===")
         if criterio == "messages":
-            last_date = leitor_msg_group(fname, ling)
+            last_date = leitor_msg_group(fname, ling, tipo)
         else:
-            last_date = leitor_words_group(fname, ling)
+            last_date = leitor_words_group(fname, ling, tipo)
         with open('membros_list.txt','r') as f:
             people = []
             for line in f:
@@ -192,6 +195,12 @@ group_lk = cum_tot.set_index('name')['group'].to_dict()
 # cria plot
 fig, ax = plt.subplots(figsize=(15, 8))
 # função
+if tipo == "w":
+    criterio = criterio + "per week"
+elif tipo == "m":
+    criterio = criterio + "per month"
+elif tipo == "q":
+    criterio = criterio + "per 15 days"
 def draw_barchart(current_date, criterio):
     dff = cum_tot[cum_tot['date'].eq(current_date)].sort_values(by='value', ascending=True).tail(10)
     ax.clear()
@@ -200,7 +209,7 @@ def draw_barchart(current_date, criterio):
     for i, (value, name) in enumerate(zip(dff['value'], dff['name'])):
         ax.text(value-dx, i,     name,           size=14, weight=600, ha='right', va='bottom')
         ax.text(value+dx, i,     f'{value:,.0f}',  size=14, ha='left',  va='center')
-    ax.text(1, 0.4, current_date, transform=ax.transAxes, color='#777777', size=35, ha='right', weight=800)
+    ax.text(1, 0.4, current_date, transform=ax.transAxes, color='#777777', size=34, ha='right', weight=800)
     ax.text(0, 1.06, criterio, transform=ax.transAxes, size=12, color='#777777')
     ax.xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
     ax.xaxis.set_ticks_position('top')
@@ -209,7 +218,7 @@ def draw_barchart(current_date, criterio):
     ax.margins(0, 0.01)
     ax.grid(which='major', axis='x', linestyle='-')
     ax.set_axisbelow(True)
-    ax.text(0, 1.15, 'People that exchanged more ' + criterio,
+    ax.text(0, 1.15, 'People that' + arc_tipo + 'more ' + criterio,
             transform=ax.transAxes, size=24, weight=600, ha='left', va='top')
     ax.text(1, 0, 'by @g7fernandes; credit @jburnmurdoch', transform=ax.transAxes, color='#777777', ha='right',
             bbox=dict(facecolor='white', alpha=0.8, edgecolor='white'))

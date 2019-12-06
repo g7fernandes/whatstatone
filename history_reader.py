@@ -241,7 +241,7 @@ def leitor_words(fname, person_name,ling):
     return(str(lista_dias[-1]))
 
 
-def leitor_msg_group(fname, ling):
+def leitor_msg_group(fname, ling,tipo):
 
     # ling = int(input('In which language was the smatphone? Enter 1 for PT or EN, enter 2 for DE, enter 3 for FR.\n'))
     aux1 = 0
@@ -331,22 +331,29 @@ def leitor_msg_group(fname, ling):
 
         lista_dias.append(data)
 
-    # nmsg1 = np.array(nmsg1)
-    # nmsg2 = np.array(nmsg2)
- 
-    # cumulative values
-    # nmsg1 = nmsg1 + nmsg2
     for i in range(len(nmsg)):
         for j in range(1,len(nmsg[i])):
-            nmsg[i][j] += nmsg[i][j-1] 
-
+            nmsg[i][j] += nmsg[i][j-1]         
+    nmsg_out = nmsg.copy()
+    if tipo == "q":
+        for i in range(len(nmsg)):
+            for j in range(15,len(nmsg[i])):
+                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-15]
+    elif tipo == "m":
+        for i in range(len(nmsg)):
+            for j in range(30,len(nmsg[i])):
+                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-30]
+    elif tipo == "w":
+        for i in range(len(nmsg)):
+            for j in range(7,len(nmsg[i])):
+                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-7]
 
     for j in range(len(pessoa)):
         person_name = pessoa[j]
         with open('results/' + person_name +"_result.csv", "w") as f:
             f.write("name," + "date,"+ "value" + "\n")
-            for i in range(len(nmsg[j])):
-                f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg[j][i]))
+            for i in range(len(nmsg_out[j])):
+                f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg_out[j][i]))
 
     print("Saved file {}\n".format(person_name + "_result.csv"))
 
@@ -358,9 +365,9 @@ def leitor_msg_group(fname, ling):
 
 
 
-def leitor_words_group(fname,ling):
+def leitor_words_group(fname,ling,tipo):
 
-
+    # tipo = 'c' cumulative, 'm' mouth, 'q', fifteen days, 'w' weekly 
     # ling = int(input('In which language was the smatphone? Enter 1 for PT or EN, enter 2 for DE, enter 3 for FR.\n'))
     aux1 = 0
     if ling == 3:
@@ -464,18 +471,32 @@ def leitor_words_group(fname,ling):
 
     for i in range(len(nmsg)):
         for j in range(1,len(nmsg[i])):
-            nmsg[i][j] += nmsg[i][j-1] 
-
+            nmsg[i][j] += nmsg[i][j-1]         
+    nmsg_out = nmsg.copy()
+    if tipo == "q":
+        for i in range(len(nmsg)):
+            for j in range(15,len(nmsg[i])):
+                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-15]
+    elif tipo == "m":
+        for i in range(len(nmsg)):
+            for j in range(30,len(nmsg[i])):
+                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-30]
+    elif tipo == "w":
+        for i in range(len(nmsg)):
+            for j in range(7,len(nmsg[i])):
+                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-7]
 
     for j in range(len(pessoa)):
         person_name = pessoa[j]
         with open('results/' + person_name +"_result.csv", "w") as f:
             f.write("name," + "date,"+ "value" + "\n")
-            for i in range(len(nmsg[j])):
-                f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg[j][i]))
+            for i in range(len(nmsg_out[j])):
+                f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg_out[j][i]))
 
     print("Saved file {}\n".format(person_name + "_result.csv"))
 
     with open('membros_list.txt','w') as f:
         for i in range(len(pessoa)):
             f.write(pessoa[i] + "\n")
+            
+    return(str(lista_dias[-1]))
