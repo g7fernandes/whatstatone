@@ -11,7 +11,7 @@ library(gganimate)
 
 
 #inputs:
-#data - the dataset, must contain a column called "year"
+#data - the dataset, must contain a column called "date"
 #x - the column which contains the numeric value to plot 
 #y - the column which contains the labels of the plot
 
@@ -33,17 +33,17 @@ make_barchart_race <- function(data,x,y,
   x <- rlang::enquo(x)
   number <- rlang::enquo(number)
   
-  #take the input dataset, compute indexs within each time period
+  #take the input dataset, compute ranks within each time period
   data %>%
     group_by(date) %>%
     arrange(-!!y) %>%
-    mutate(index=row_number()) %>%
+    mutate(rank=row_number()) %>%
     #filter to top "number"
-    filter(index<=!!number) -> data
+    filter(rank<=!!number) -> data
   
   #plot the data
   data %>%
-    ggplot(aes(x=-index,y=!!y,fill=!!x, group=!!x)) +
+    ggplot(aes(x=-rank,y=!!y,fill=!!x, group=!!x)) +
     geom_tile(aes(y=!!y/2,height=!!y),width=0.9,show.legend = F)+
     geom_text(aes(label=!!x),
               hjust="right",
@@ -65,15 +65,15 @@ make_barchart_race <- function(data,x,y,
           plot.subtitle = element_text(size=20,colour="grey50",face="bold"),
           plot.margin = margin(1,1,1,2,"cm"),
           axis.text.y=element_blank())+
-    #this bit does the animation by year
-    transition_time(year) +
+    #this bit does the animation by date
+    transition_time(date) +
     labs(title=title,
          subtitle='{round(frame_time,0)}',
          caption=caption)-> p
   
   #animate the plot - this is returned by the function
   # animate(p, nframes = nframes, fps = fps, end_pause = end_pause)
-  animate(anim, 2400, fps = 20,  width = 1200, height = 1000, renderer = ffmpeg_renderer()) -> for_mp4
+  animate(p, 1440, fps = 16,  width = 1280, height = 720, renderer = ffmpeg_renderer()) 
 }
 
 
@@ -81,16 +81,14 @@ make_barchart_race <- function(data,x,y,
 #Example usage:
 
 #read in a dataset:
-data <- read_csv('concat.csv')
+data <- read_csv('database4R.csv')
 
 #call the function to make the animation:
 make_barchart_race(data,
                    name,
                    value,
-                   title="Interbrand Top Global Brands\n(brand values in $)",
-                   caption="Source: Interbrand")
+                   title="Messages sent",
+                   caption="Source: per month")
 #save it:
-# anim_save("out.gif")
 
-
-anim_save("animation_per_month.mp4", animation = for_mp4 )
+anim_save("animation_per_month.mp4")

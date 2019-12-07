@@ -128,7 +128,8 @@ def leitor_msg(fname, person_name,ling):
     with open('results/' + person_name[0:len(person_name)-4]+"_result.csv", "w") as f:
         f.write("name," + "date,"+ "value" + "\n")
         for i in range(len(nmsg1)):
-            f.write(person_name[0:len(person_name)-4] + ",{}, {}\n".format(lista_dias[i], nmsg1[i]))
+            if lista_dias[i] != lista_dias[i-1]:
+                f.write(person_name[0:len(person_name)-4] + ",{}, {}\n".format(lista_dias[i], nmsg1[i]))
 
     print("Saved file {}\n".format(person_name[0:len(person_name)-4]+"_result.csv"))
 
@@ -234,7 +235,8 @@ def leitor_words(fname, person_name,ling):
     with open('results/' + person_name[0:len(person_name)-4]+"_result.csv", "w") as f:
         f.write("name," + "date,"+ "value" + "\n")
         for i in range(len(nmsg1)):
-            f.write(person_name[0:len(person_name)-4] + ",{}, {}\n".format(lista_dias[i], nmsg1[i]))
+            if lista_dias[i] != lista_dias[i-1]:
+                f.write(person_name[0:len(person_name)-4] + ",{}, {}\n".format(lista_dias[i], nmsg1[i]))
 
     print("Saved file {}\n".format(person_name[0:len(person_name)-4]+"_result.csv"))
 
@@ -359,7 +361,8 @@ def leitor_msg_group(fname, ling,tipo):
         with open('results/' + person_name +"_result.csv", "w") as f:
             f.write("name," + "date,"+ "value" + "\n")
             for i in range(len(nmsg_out[j])):
-                f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg_out[j][i]))
+                if lista_dias[i] != lista_dias[i-1]:
+                    f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg_out[j][i]))
 
         print("Saved file {}\n".format(person_name + "_result.csv"))
 
@@ -455,7 +458,7 @@ def leitor_words_group(fname,ling,tipo):
                         i = 0 
                         while aux and i < len(pessoa):
                             if name == pessoa[i]:
-                                nmsg[i][d] += 1
+                                nmsg[i][d] += len(palavras)
                                 aux = False
                             else:
                                 i += 1
@@ -502,7 +505,8 @@ def leitor_words_group(fname,ling,tipo):
         with open('results/' + person_name +"_result.csv", "w") as f:
             f.write("name," + "date,"+ "value" + "\n")
             for i in range(len(nmsg_out[j])):
-                f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg_out[j][i]))
+                if lista_dias[i] != lista_dias[i-1]:
+                    f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg_out[j][i]))
 
         print("Saved file {}\n".format(person_name + "_result.csv"))
 

@@ -85,6 +85,7 @@ if a == '1':
         if criterio == "messages":
             last_date = leitor_msg_group(fname, ling, tipo)
         else:
+            print("Critério Words group")
             last_date = leitor_words_group(fname, ling, tipo)
         with open('membros_list.txt','r') as f:
             people = []
@@ -105,7 +106,7 @@ if a == '1':
             cum_tot = pd.concat([cum_tot,cum_par])
 
     del cum_par 
-
+    
     cum_tot = cum_tot.reset_index(drop=True)
 
     dates = cum_tot['date'].values.tolist() 
@@ -150,6 +151,13 @@ else:
     cum_tot = pd.read_csv("concat.csv")
     dates = cum_tot['date'].values.tolist() 
     dates = list(dict.fromkeys(dates))
+    if os.path.exists('membros_list.txt'):
+        with open('membros_list.txt','r') as f:
+            people = []
+            for line in f:
+                people.append(line)
+            for i in range(len(people)): 
+                people[i] = people[i].replace("\n","") + ".txt"
     dates.sort()   
 
 #%% PLOT #
@@ -241,26 +249,50 @@ if jump > 1:
         else:
             i += 1
 
-fps = int(input("Enter a number of frames per second: "))
-
-
-animator = animation.FuncAnimation(fig, draw_barchart, frames=dates, fargs=(criterio,), interval=int(1000/fps))
-print("Saving... (may take a while)\n")
-animator.save(criterio + "_animated_chart.mp4",writer="ffmpeg")
-print("Saved animated_chart.mp4\n")
+aux = input("make video using matplotlib? [y/n] ")
+if aux == "y":
+    fps = int(input("Enter a number of frames per second: "))
+    animator = animation.FuncAnimation(fig, draw_barchart, frames=dates, fargs=(criterio,), interval=int(1000/fps))
+    print("Saving... (may take a while)\n")
+    animator.save(criterio + "_animated_chart.mp4",writer="ffmpeg")
+    print("Saved animated_chart.mp4\n")
 # HTML(animator.to_jshtml()) or use animator.to_html5_video() or animator.save()
 
 aux = input("Export database for R [y/n]? ")
+N = [x for x in range(1,len(people)+1)]
 if not aux == "n":
     cont = 0
+    if pbar:
+        bar = progressbar.ProgressBar(max_value=len(dates))
     for current_date in dates:
+        if pbar: bar.update(i)
         if cont == 0:
-            df2R =  cum_tot[cum_tot['date'].eq(current_date)].sort_values(by='value', ascending=True).tail(10)
-            df2R.insert(0, "index", [1,2,3,4,5,6,7,8,9,10], True)  
+            df2R =  cum_tot[cum_tot['date'].eq(current_date)].sort_values(by='value', ascending=True) #.tail(10)
+            df2R.insert(0, "rank", N, True)  
         else: 
-            df2R_aux =  cum_tot[cum_tot['date'].eq(current_date)].sort_values(by='value', ascending=True).tail(10)
-            df2R_aux.insert(0, "index", [1,2,3,4,5,6,7,8,9,10], True) 
+            df2R_aux =  cum_tot[cum_tot['date'].eq(current_date)].sort_values(by='value', ascending=True) #.tail(10)
+            df2R_aux.insert(0, "rank", N, True) 
             df2R = pd.concat([df2R, df2R_aux])
         cont += 1
 
-    df2R.to_csv("database4R.csv")
+    df2R.to_csv("database4R.csv",index=False)
+
+if tipo == "c":
+    print("Let's build a rank! First message: {} Last message: {}\n".format(dates[0],dates[-1]))
+    ini_date = input("Enter initial date (format yyyy-mm-dd)\n")
+    final_date = input("Enter final date (format yyyy-mm-dd)\n")
+    df2R =  cum_tot[cum_tot["date"].eq(ini_date)].sort_values(by='name', ascending=True)
+    df2R =df2R.reset_index(drop=True)
+    df2R_aux =  cum_tot[cum_tot["date"].eq(final_date)].sort_values(by='name', ascending=True)
+    df2R_aux = df2R_aux.reset_index(drop=True)
+    df2R["value"] = df2R_aux["value"]  - df2R["value"] 
+    df2R =  df2R.sort_values(by='value', ascending=False)
+    df2R =df2R.reset_index(drop=True)
+    df2R.to_csv("rank"+arc_tipo+criterio+".csv",columns=["name","value","date"])
+    print("*Rank | Name | nmsg*")
+    for line in range(len(df2R)):
+        print("{:3d} {} - {}".format(line,df2R["name"].iloc[line],df2R["value"].iloc[line]))
+        
+
+
+     
