@@ -35,7 +35,7 @@ if a == '1':
 
     # Language of the smatphone. Important to read date and time correctly.
 
-    ling = 2 #int(input('In which language was the smatphone? Enter 1 for PT or EN, enter 2 for DE, enter 3 for FR.\n'))
+    ling = int(input('In which language was the smatphone? Enter 1 for PT or EN, enter 2 for DE, enter 3 for FR.\n'))
     aux1 = 0
     if ling == 3:
         aux1 = 1
