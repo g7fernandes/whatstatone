@@ -1,3 +1,5 @@
+# The audio file must be longer than
+# the video 
 vin="words_animated_chart.mp4"
 vout="words_animated_chart_out.mp4"
 audin="pop.mp3"
