@@ -33,17 +33,17 @@ make_barchart_race <- function(data,x,y,
   x <- rlang::enquo(x)
   number <- rlang::enquo(number)
   
-  #take the input dataset, compute ranks within each time period
+  #take the input dataset, compute indexs within each time period
   data %>%
-    group_by(year) %>%
+    group_by(date) %>%
     arrange(-!!y) %>%
-    mutate(rank=row_number()) %>%
+    mutate(index=row_number()) %>%
     #filter to top "number"
-    filter(rank<=!!number) -> data
+    filter(index<=!!number) -> data
   
   #plot the data
   data %>%
-    ggplot(aes(x=-rank,y=!!y,fill=!!x, group=!!x)) +
+    ggplot(aes(x=-index,y=!!y,fill=!!x, group=!!x)) +
     geom_tile(aes(y=!!y/2,height=!!y),width=0.9,show.legend = F)+
     geom_text(aes(label=!!x),
               hjust="right",
@@ -72,7 +72,8 @@ make_barchart_race <- function(data,x,y,
          caption=caption)-> p
   
   #animate the plot - this is returned by the function
-  animate(p, nframes = nframes, fps = fps, end_pause = end_pause)
+  # animate(p, nframes = nframes, fps = fps, end_pause = end_pause)
+  animate(anim, 2400, fps = 20,  width = 1200, height = 1000, renderer = ffmpeg_renderer()) -> for_mp4
 }
 
 
@@ -80,7 +81,7 @@ make_barchart_race <- function(data,x,y,
 #Example usage:
 
 #read in a dataset:
-data <- read_csv('https://gist.githubusercontent.com/johnburnmurdoch/2e5712cce1e2a9407bf081a952b85bac/raw/08cf82f5e03c619f7da2700d1777da0b5247df18/INTERBRAND_brand_values_2000_2018_decimalised.csv')
+data <- read_csv('concat.csv')
 
 #call the function to make the animation:
 make_barchart_race(data,
@@ -89,4 +90,7 @@ make_barchart_race(data,
                    title="Interbrand Top Global Brands\n(brand values in $)",
                    caption="Source: Interbrand")
 #save it:
-anim_save("out.gif")
+# anim_save("out.gif")
+
+
+anim_save("animation_per_month.mp4", animation = for_mp4 )
