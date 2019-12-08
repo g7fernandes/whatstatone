@@ -344,20 +344,21 @@ def leitor_msg_group(fname, ling,tipo):
     nmsg_out = nmsg.copy()
     if tipo == "q":
         for i in range(len(nmsg)):
+            nmsg_aux = np.array(nmsg[i])
             nmsg_aux = nmsg_aux[15:] - nmsg_aux[:len(nmsg_aux)-15]
             for j in range(len(nmsg_aux)):
-                nmsg_out[i][j] = nmsg_aux[j]
+                nmsg_out[i][j+15] = nmsg_aux[j]
     elif tipo == "m":
         for i in range(len(nmsg)):
             nmsg_aux = np.array(nmsg[i])
             nmsg_aux = nmsg_aux[30:] - nmsg_aux[:len(nmsg_aux)-30]
             for j in range(len(nmsg_aux)):
-                nmsg_out[i][j] = nmsg_aux[j]
+                nmsg_out[i][j+30] = nmsg_aux[j]
     elif tipo == "w":
         for i in range(len(nmsg)):
             nmsg_aux = nmsg_aux[7:] - nmsg_aux[:len(nmsg_aux)-7]
             for j in range(len(nmsg_aux)):
-                nmsg_out[i][j] = nmsg_aux[j]
+                nmsg_out[i][j+7] = nmsg_aux[j]
 
     
     if not tipo == "c":
@@ -497,16 +498,21 @@ def leitor_words_group(fname,ling,tipo):
     nmsg_out = nmsg.copy()
     if tipo == "q":
         for i in range(len(nmsg)):
-            for j in range(15,len(nmsg[i])):
-                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-15]
+            nmsg_aux = np.array(nmsg[i])
+            nmsg_aux = nmsg_aux[15:] - nmsg_aux[:len(nmsg_aux)-15]
+            for j in range(len(nmsg_aux)):
+                nmsg_out[i][j+15] = nmsg_aux[j]
     elif tipo == "m":
         for i in range(len(nmsg)):
-            for j in range(30,len(nmsg[i])):
-                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-30]
+            nmsg_aux = np.array(nmsg[i])
+            nmsg_aux = nmsg_aux[30:] - nmsg_aux[:len(nmsg_aux)-30]
+            for j in range(len(nmsg_aux)):
+                nmsg_out[i][j+30] = nmsg_aux[j]
     elif tipo == "w":
         for i in range(len(nmsg)):
-            for j in range(7,len(nmsg[i])):
-                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-7]
+            nmsg_aux = nmsg_aux[7:] - nmsg_aux[:len(nmsg_aux)-7]
+            for j in range(len(nmsg_aux)):
+                nmsg_out[i][j+7] = nmsg_aux[j]
 
     if not tipo == "c":
         for i in range(len(nmsg)):
