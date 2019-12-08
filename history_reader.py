@@ -256,9 +256,10 @@ def leitor_msg_group(fname, ling,tipo):
     lista_dias = []
 
     d = 0
-
+    ct = 0
     with open(fname,encoding='utf-8') as f:
         for line in f:
+            ct += 1
             line2 = line.replace("\u200e","")
             palavras = line2.split()
             #verifica se é mensagem
@@ -288,35 +289,39 @@ def leitor_msg_group(fname, ling,tipo):
                             data_ant = data0
                             nmsg[0].append(0)
 
-                        else:
-                            data = date(int(palavras[0][6:8]) + 2000, int(palavras[0][3:5]), int(palavras[0][0:2]))
-                            tl = data - data_ant 
-                            # verifica se passaram dias entre as mensagens
-                            if tl.total_seconds()/86400 >= 1:
-                                for i in range(int(tl.total_seconds()/86400)):
-                                    for j in range(len(nmsg)):
-                                        nmsg[j].append(0)
-                                    d += 1
-                                    lista_dias.append(data_ant + timedelta(days=i))
-                            data_ant = data
-                          
+                        elif len(nmsg) >= 1:
+                            try: 
+                                data = date(int(palavras[0][6:8]) + 2000, int(palavras[0][3:5]), int(palavras[0][0:2]))
+                                tl = data - data_ant 
+                                # verifica se passaram dias entre as mensagens
+                                if tl.total_seconds()/86400 >= 1:
+                                    for i in range(int(tl.total_seconds()/86400)):
+                                        for j in range(len(nmsg)):
+                                            nmsg[j].append(0)
+                                        d += 1
+                                        lista_dias.append(data_ant + timedelta(days=i))
+                                data_ant = data
+                            except:
+                                print("Warnig: Problematic line no {}\n".format(ct))
                     elif ling == 1:
                         if len(nmsg) == 1:
                             data0 = date(int(palavras[0][6:10]), int(palavras[0][3:5]), int(palavras[0][0:2]))
                             data_ant = data0
                             nmsg[0].append(0)
-                        else:
-                            data = date(int(palavras[0][6:10]), int(palavras[0][3:5]), int(palavras[0][0:2]))
-                            tl = data - data_ant 
-                            # verifica se passaram dias entre as mensagens
-                            if tl.total_seconds()/86400 >= 1:
-                                for i in range(int(tl.total_seconds()/86400)):
-                                    for j in range(len(nmsg)):
-                                        nmsg[j].append(0)
-                                    d += 1
-                                    lista_dias.append(data_ant + timedelta(days=i))
-                            data_ant = data
-
+                        elif len(nmsg) >= 1:
+                            try:
+                                data = date(int(palavras[0][6:10]), int(palavras[0][3:5]), int(palavras[0][0:2]))
+                                tl = data - data_ant 
+                                # verifica se passaram dias entre as mensagens
+                                if tl.total_seconds()/86400 >= 1:
+                                    for i in range(int(tl.total_seconds()/86400)):
+                                        for j in range(len(nmsg)):
+                                            nmsg[j].append(0)
+                                        d += 1
+                                        lista_dias.append(data_ant + timedelta(days=i))
+                                data_ant = data
+                            except:
+                                print("Warnig: Problematic line no {}\n".format(ct))
 
                     # Adiciona mensagem a posição d referente ao dia após data0
                     if (len(pessoa) > 0):
@@ -339,16 +344,20 @@ def leitor_msg_group(fname, ling,tipo):
     nmsg_out = nmsg.copy()
     if tipo == "q":
         for i in range(len(nmsg)):
-            for j in range(15,len(nmsg[i])):
-                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-15]
+            nmsg_aux = nmsg_aux[15:] - nmsg_aux[:len(nmsg_aux)-15]
+            for j in range(len(nmsg_aux)):
+                nmsg_out[i][j] = nmsg_aux[j]
     elif tipo == "m":
         for i in range(len(nmsg)):
-            for j in range(30,len(nmsg[i])):
-                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-30]
+            nmsg_aux = np.array(nmsg[i])
+            nmsg_aux = nmsg_aux[30:] - nmsg_aux[:len(nmsg_aux)-30]
+            for j in range(len(nmsg_aux)):
+                nmsg_out[i][j] = nmsg_aux[j]
     elif tipo == "w":
         for i in range(len(nmsg)):
-            for j in range(7,len(nmsg[i])):
-                nmsg_out[i][j] = nmsg[i][j] - nmsg[i][j-7]
+            nmsg_aux = nmsg_aux[7:] - nmsg_aux[:len(nmsg_aux)-7]
+            for j in range(len(nmsg_aux)):
+                nmsg_out[i][j] = nmsg_aux[j]
 
     
     if not tipo == "c":
@@ -360,7 +369,7 @@ def leitor_msg_group(fname, ling,tipo):
         person_name = pessoa[j]
         with open('results/' + person_name +"_result.csv", "w") as f:
             f.write("name," + "date,"+ "value" + "\n")
-            for i in range(len(nmsg_out[j])):
+            for i in range(len(lista_dias)):
                 if lista_dias[i] != lista_dias[i-1]:
                     f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg_out[j][i]))
 
@@ -388,7 +397,7 @@ def leitor_words_group(fname,ling,tipo):
     lista_dias = []
 
     d = 0
-
+    ct = 0
     message_valid = False
     with open(fname,encoding='utf-8') as f:
         for line in f:
@@ -422,35 +431,39 @@ def leitor_words_group(fname,ling,tipo):
                             data0 = date(int(palavras[0][6:8]) + 2000, int(palavras[0][3:5]), int(palavras[0][0:2]))
                             data_ant = data0
                             nmsg[0].append(0)
-                        else:
-                            data = date(int(palavras[0][6:8]) + 2000, int(palavras[0][3:5]), int(palavras[0][0:2]))
-                            tl = data - data_ant 
-                            # verifica se passaram dias entre as mensagens
-                            if tl.total_seconds()/86400 >= 1:
-                                for i in range(int(tl.total_seconds()/86400)):
-                                    for j in range(len(nmsg)):
-                                        nmsg[j].append(0)
-                                    d += 1
-                                    lista_dias.append(data_ant + timedelta(days=i))
-                            data_ant = data
-
+                        elif len(nmsg) >= 1:
+                            try:
+                                data = date(int(palavras[0][6:8]) + 2000, int(palavras[0][3:5]), int(palavras[0][0:2]))
+                                tl = data - data_ant 
+                                # verifica se passaram dias entre as mensagens
+                                if tl.total_seconds()/86400 >= 1:
+                                    for i in range(int(tl.total_seconds()/86400)):
+                                        for j in range(len(nmsg)):
+                                            nmsg[j].append(0)
+                                        d += 1
+                                        lista_dias.append(data_ant + timedelta(days=i))
+                                data_ant = data
+                            except:
+                                print("Warnig: Problematic line no {}\n".format(ct))
                     elif ling == 1:
                         if len(nmsg) == 1:
                             data0 = date(int(palavras[0][6:10]), int(palavras[0][3:5]), int(palavras[0][0:2]))
                             data_ant = data0
                             nmsg[0].append(0)
-                        else:
-                            data = date(int(palavras[0][6:10]), int(palavras[0][3:5]), int(palavras[0][0:2]))
-                            tl = data - data_ant 
-                            # verifica se passaram dias entre as mensagens
-                            if tl.total_seconds()/86400 >= 1:
-                                for i in range(int(tl.total_seconds()/86400)):
-                                    for j in range(len(nmsg)):
-                                        nmsg[j].append(0)
-                                    d += 1
-                                    lista_dias.append(data_ant + timedelta(days=i))
-                            data_ant = data
-
+                        elif len(nmsg) >= 1:
+                            try:
+                                data = date(int(palavras[0][6:10]), int(palavras[0][3:5]), int(palavras[0][0:2]))
+                                tl = data - data_ant 
+                                # verifica se passaram dias entre as mensagens
+                                if tl.total_seconds()/86400 >= 1:
+                                    for i in range(int(tl.total_seconds()/86400)):
+                                        for j in range(len(nmsg)):
+                                            nmsg[j].append(0)
+                                        d += 1
+                                        lista_dias.append(data_ant + timedelta(days=i))
+                                data_ant = data
+                            except:
+                                print("Warnig: Problematic line no {}\n".format(ct))
                     # Adiciona mensagem a posição d referente ao dia após data0
                     if (len(pessoa) > 0):
                         name = nome(palavras)

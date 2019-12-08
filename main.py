@@ -277,22 +277,25 @@ if not aux == "n":
 
     df2R.to_csv("database4R.csv",index=False)
 
-if tipo == "c":
-    print("Let's build a rank! First message: {} Last message: {}\n".format(dates[0],dates[-1]))
-    ini_date = input("Enter initial date (format yyyy-mm-dd)\n")
-    final_date = input("Enter final date (format yyyy-mm-dd)\n")
-    df2R =  cum_tot[cum_tot["date"].eq(ini_date)].sort_values(by='name', ascending=True)
-    df2R =df2R.reset_index(drop=True)
-    df2R_aux =  cum_tot[cum_tot["date"].eq(final_date)].sort_values(by='name', ascending=True)
-    df2R_aux = df2R_aux.reset_index(drop=True)
-    df2R["value"] = df2R_aux["value"]  - df2R["value"] 
-    df2R =  df2R.sort_values(by='value', ascending=False)
-    df2R =df2R.reset_index(drop=True)
-    df2R.to_csv("rank"+arc_tipo+criterio+".csv",columns=["name","value","date"])
-    print("*Rank | Name | nmsg*")
-    for line in range(len(df2R)):
-        print("{:3d} {} - {}".format(line,df2R["name"].iloc[line],df2R["value"].iloc[line]))
-        
+if tipo == "c": aux = "y"
+while not aux == 'n':
+    if tipo == "c":
+        print("Let's build a rank! First message: {} Last message: {}\n".format(dates[0],dates[-1]))
+        ini_date = input("Enter initial date (format yyyy-mm-dd)\n")
+        final_date = input("Enter final date (format yyyy-mm-dd)\n")
+        df2R =  cum_tot[cum_tot["date"].eq(ini_date)].sort_values(by='name', ascending=True)
+        df2R =df2R.reset_index(drop=True)
+        df2R_aux =  cum_tot[cum_tot["date"].eq(final_date)].sort_values(by='name', ascending=True)
+        df2R_aux = df2R_aux.reset_index(drop=True)
+        df2R["value"] = df2R_aux["value"]  - df2R["value"] 
+        df2R =  df2R.sort_values(by='value', ascending=False)
+        df2R =df2R.reset_index(drop=True)
+        df2R.to_csv("rank"+arc_tipo+criterio+".csv",columns=["name","value","date"])
+        print("*Rank | Name | nmsg*")
+        for line in range(len(df2R)):
+            print("{:3d} {} - {}".format(line+1,df2R["name"].iloc[line],df2R["value"].iloc[line]))
+        aux = input("Do rank with other dates? [y/n]")
 
-
+if os.path.exists('results'):
+    shutil.rmtree('results')
      
