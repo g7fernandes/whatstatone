@@ -402,6 +402,7 @@ def leitor_words_group(fname,ling,tipo):
     message_valid = False
     with open(fname,encoding='utf-8') as f:
         for line in f:
+            ct += 1
             line2 = line.replace("\u200e","")
             palavras = line2.split()
             #verifica se é mensagem
@@ -523,7 +524,7 @@ def leitor_words_group(fname,ling,tipo):
         person_name = pessoa[j]
         with open('results/' + person_name +"_result.csv", "w") as f:
             f.write("name," + "date,"+ "value" + "\n")
-            for i in range(len(nmsg_out[j])):
+            for i in range(len(lista_dias)):
                 if lista_dias[i] != lista_dias[i-1]:
                     f.write(person_name + ",{}, {}\n".format(lista_dias[i], nmsg_out[j][i]))
 
