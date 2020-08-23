@@ -1,5 +1,9 @@
 {
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "editor.rulers": [79,120],
+    "workbench.colorCustomizations": {
+        "editorRuler.foreground": "#222f31"
+    }
 }
