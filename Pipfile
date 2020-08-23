@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "*"
+matplotlib = "*"
+progressbar2 = "*"
+pandas = "*"
+
+[dev-packages]
+flake8 = "*"
+mypy = "*"
+ipython = "*"
+
+[requires]
+python_version = "3.8"

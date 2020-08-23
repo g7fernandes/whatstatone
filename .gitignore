@@ -5,3 +5,7 @@
 *.mp4
 *.png
 .git
+*.egg-info
+.venv
+.eggs
+__pycache__
