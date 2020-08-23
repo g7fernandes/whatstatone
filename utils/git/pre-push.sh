@@ -1,0 +1,87 @@
+#!/bin/bash
+
+BASE_PATH="$(git rev-parse --show-toplevel)"
+
+while read -r line; do
+  STAGED_PY_FILES_ARRAY+=("${line:2}")
+done <<< "$(find . -path ./.git -prune -o -name '*.py' | grep -v .venv)"
+STAGED_PY_FILES="$BASE_PATH"
+
+function test_dependencies {
+    if ! type "$FLAKE8" &> /dev/null; then
+      printf "\033[41mPlease install Flake8 or make sure that it's in the PATH\033[0m\n"
+      return 1
+    fi
+    if ! type "$MYPY" &> /dev/null; then
+      printf "\033[41mPlease install mypy or make sure that it's in the PATH\033[0m\n"
+      return 1
+    fi
+
+    return 0
+}
+
+
+# Lint check
+function call_flake8 {
+    if [ -z "$STAGED_PY_FILES" ]; then
+        echo "No python files changed, nothing to lint with flake8"
+        return 0
+    fi
+
+    echo "Linting Python files with Flake8 ($FLAKE8)"
+
+    $FLAKE8 --config $BASE_PATH/setup.cfg $STAGED_PY_FILES
+    FLAKE8_EXIT=$?
+
+    if [[ "${FLAKE8_EXIT}" == 0 ]]; then
+      printf "\033[42mFLAKE8 SUCCEEDED\033[0m\n"
+    else
+      printf "\033[41mFLAKE8 FAILED:\033[0m Fix flake8 errors and try again\n"
+      return 1
+    fi
+
+    return 0
+}
+
+
+# Typing check
+function call_mypy {
+  MYPY_ERRORS=false
+  if [ -z "$STAGED_PY_FILES" ]; then
+      echo "No python files changed, nothing to lint with mypy"
+      return 0
+  fi
+
+  echo "Type checking Python files with mypy ($MYPY)"
+
+  IGNORE=$(awk -F "= " '/mypy_ignore_folder/ {print $2}' "$BASE_PATH"/setup.cfg)
+  IGNORE=$(echo "^""$IGNORE" | sed -r "s/[,]+/|^/g")
+  for PYFILE in "${STAGED_PY_FILES_ARRAY[@]}"; do
+    if ! grep -Eowq "$IGNORE" <<< "${PYFILE//.\/}"; then
+      MYPY_EXIT=$($MYPY --config-file "$BASE_PATH"/setup.cfg $PYFILE)
+
+      if [[ $MYPY_EXIT != *"error"* ]]; then
+        printf "\033[42mMYPY SUCCEEDED\033[0m for %s\n" "$PYFILE"
+      else
+        $MYPY --config-file $BASE_PATH/setup.cfg "$PYFILE"
+        printf "\033[41mMYPY FOUND PROBLEMS\033[0m for %s$\n" "$PYFILE"
+        MYPY_ERRORS=true
+      fi
+
+    else
+      printf "%s \033[1mignored\033[0m\n" "$PYFILE"
+    fi
+
+  done
+
+  if $MYPY_ERRORS; then
+    printf "\e[31m\e[1mFix typing errors!\e[0m\n"
+    return 1
+  fi
+  return 0
+}
+
+test_dependencies &&
+call_mypy &&
+call_flake8 &&
+
