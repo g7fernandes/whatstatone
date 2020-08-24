@@ -1,0 +1,82 @@
+{
+    "folder_containing_history": "example_group_chat",
+    "my_name": ["Gabriel Fernandes"],
+    "merge_similar_names": false,
+    "messages": {
+        "conversation_analysis" : {
+            "starters_repliers_ignored": {
+                "interval": 8
+            },
+            "hourly_frequency" : {
+                "title": "Average messages per hour",
+                "plot_keys": [],
+                "plot_total": true
+            },
+            "weekly_frequency" : {
+                "title": "Average messages per weekday",
+                "plot_keys": [],
+                "plot_total": true
+            }
+        },
+        "rank": {
+            "sent_received_exchanged": "",
+            "period": ["2000-01-01", "2222-11-01"],
+            "graph": {
+                "max_people_per_graph": 5,
+                "force_draw_names": [],
+                "chart_type": "bar",
+                "metadata": "graph_metadata/rank_graph.json",
+                "animate": false
+            },
+            "moving_average": {
+                "sent_received_exchanged": "",
+                "window": 30,
+                "graph": {
+                    "max_people_per_graph": 5,
+                    "force_draw_names": [],
+                    "plot_total": true,
+                    "animate": false,
+                    "chart_type": "line",
+                    "metadata": "graph_metadata/mv_avg_graph.json"
+                }
+            }
+        }
+    },
+    "words": {
+        "conversation_analysis": {
+            "hourly_frequency" : {
+                "title": "Average words per hour",
+                "plot_keys": [],
+                "plot_total": true
+            },
+            "weekly_frequency" : {
+                "title": "Average words per weekday",
+                "plot_keys": [],
+                "plot_total": true
+            }
+        },
+        "rank": {
+            "sent_received_exchanged": "",
+            "period": ["2000-11-11", "2222-11-01"],
+            "graph": {
+                "max_people_per_graph": 5,
+                "force_draw_names": [],
+                "chart_type": "bar",
+                "metadata": "graph_metadata/rank_graph_words.json",
+                "animate": false
+            },
+            "moving_average": {
+                "sent_received_exchanged": "",
+                "window": 7,
+                "graph": {
+                    "max_people_per_graph": 5,
+                    "force_draw_names": [],
+                    "plot_total": true,
+                    "animate": false,
+                    "chart_type": "line",
+                    "metadata": "graph_metadata/mv_avg_graph_words.json"
+                }
+            }
+        }
+    }
+}

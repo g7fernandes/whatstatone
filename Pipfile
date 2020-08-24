@@ -8,11 +8,17 @@ numpy = "*"
 matplotlib = "*"
 progressbar2 = "*"
 pandas = "*"
+bar-chart-race = "*"
 
 [dev-packages]
 flake8 = "*"
 mypy = "*"
 ipython = "*"
+autopep8 = "*"
 
 [requires]
 python_version = "3.8"
+
+[scripts]
+whatstat = "python whatstat/main.py"
+mergechats = "python whatstat/merge_chat_files.py"

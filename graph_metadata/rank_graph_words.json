@@ -1,0 +1,15 @@
+{
+    "title": "Words Rank",
+    "plot_keys": ["Gabriel Fernandes Silva", "Raissa Peres"],
+    "figsize": [16, 10],
+    "max_names_per_graph": 8,
+    "background_text" : "",
+    "footer": "by @g7fernandes; credit @jburnmurdoch",
+    "subtitle": "Some subtitle",
+    "animation": {
+        "fps": 10,
+        "step": 7,
+        "use_bar_chart_race_package": true,
+        "bcr_period": 100
+    }
+}
