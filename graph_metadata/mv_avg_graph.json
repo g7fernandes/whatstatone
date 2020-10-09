@@ -1,0 +1,14 @@
+{
+    "title": "Moving average of sent messages",
+    "plot_keys": [],
+    "figsize": [15, 18],
+    "max_names_per_graph": 1,
+    "plot_total": true,
+    "background_text" : "",
+    "footer": "by @g7fernandes; credit @jburnmurdoch",
+    "subtitle": "Some subtitle",
+    "animation": {
+        "fps": 15,
+        "step": 7
+    }
+}

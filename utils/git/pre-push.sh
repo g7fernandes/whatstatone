@@ -1,11 +1,14 @@
 #!/bin/bash
 
 BASE_PATH="$(git rev-parse --show-toplevel)"
+FLAKE8="flake8"
+MYPY="mypy"
 
 while read -r line; do
   STAGED_PY_FILES_ARRAY+=("${line:2}")
 done <<< "$(find . -path ./.git -prune -o -name '*.py' | grep -v .venv)"
 STAGED_PY_FILES="$BASE_PATH"
+
 
 function test_dependencies {
     if ! type "$FLAKE8" &> /dev/null; then
@@ -83,5 +86,4 @@ function call_mypy {
 
 test_dependencies &&
 call_mypy &&
-call_flake8 &&
-
+call_flake8

@@ -1,0 +1,15 @@
+{
+    "title": "Moving average of sent words",
+    "plot_keys": [],
+    "figsize": [15, 18],
+    "max_names_per_graph": 5,
+    "background_text" : "",
+    "plot_total": true,
+    "footer": "by @g7fernandes; credit @jburnmurdoch",
+    "subtitle": "Some subtitle",
+    "animation": {
+        "fps": 15,
+        "step": 30,
+        "use_bar_chart_race_package": true
+    }
+}

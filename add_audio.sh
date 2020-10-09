@@ -1,8 +1,8 @@
 # The audio file must be longer than
 # the video 
-vin="words_animated_chart.mp4"
-vout="words_animated_chart_out.mp4"
-audin="pop.mp3"
+vin=$1
+vout="$1_out.mp4"
+audin="$2"
 a=$(ffprobe -i "$vin" -show_entries format=duration -v quiet -of csv="p=0")
 a=${a%.*}
 a=`expr $a + 3`
