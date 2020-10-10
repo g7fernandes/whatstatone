@@ -6,7 +6,7 @@ import numpy as np
 from reader import Message
 from datetime import datetime, timedelta
 from typing import (List, Dict, Any, Tuple, Union,
-                    ItemsView, Iterable)
+                    ItemsView, Iterable, Optional)
 from utils import get_dates
 from itertools import cycle
 import progressbar
@@ -23,19 +23,22 @@ DataCollection = Union[ItemsView[str, float], List[Tuple[str, float]]]
 def filter_data_to_plot(
     data: Union[Iterable, DataCollection],
     keys2plot: List['str'],
-    max_number: int = 0
-) -> List[Tuple[str, Union[float, np.array]]]:
-    filtered_data: List[Tuple[str, Union[float, np.array]]] = []
+    max_number: Optional[int] = None
+) -> List[Tuple[str, np.ndarray]]:
+    filtered_data: List[Tuple[str, np.ndarray]] = []
 
+    if max_number is None:
+        max_number = len(keys2plot)
     for k, v in data:
-        if k in keys2plot or max_number > 0:
-            max_number -= 1
+        if k in keys2plot or abs(max_number) > 0:
+            if max_number:
+                max_number -= 1
             filtered_data.append((k, v))
     return filtered_data
 
 
 def draw_hourly_mean(
-    data_dict: Dict[str, np.array],
+    data_dict: Dict[str, np.ndarray],
     metadata: Dict[str, Any]
 ):
     fig, ax = plt.subplots(figsize=(15, 8), constrained_layout=True)
@@ -61,17 +64,22 @@ def draw_hourly_mean(
 
 
 def draw_weekly_mean(
-    data_dict: Dict[str, np.array],
+    data_dict: Dict[str, np.ndarray],
     metadata: Dict[str, Any]
 ):
     fig, ax = plt.subplots(figsize=(15, 8), constrained_layout=True)
 
-    filtered: List[Tuple[str, np.array]]
-    if curves_to_plot := metadata.get('plot_keys'):
-        filtered = filter_data_to_plot(data_dict, curves_to_plot)
+    curves_to_plot = metadata.get('plot_keys')
+    if not isinstance(curves_to_plot, List):
+        raise SystemExit('Names to plot must be list of string')
 
-    if metadata.get('plot_total') or len(filtered) == 0:
-        filtered.append(('Total', data_dict['TOTAL']))
+    if metadata.get('plot_total') or not curves_to_plot:
+        curves_to_plot.append('TOTAL')
+
+    filtered: List[Tuple[str, np.ndarray]] = filter_data_to_plot(
+        data_dict.items(),
+        curves_to_plot
+    )
 
     days = ['.Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon.']
 
@@ -83,7 +91,7 @@ def draw_weekly_mean(
 
 
 def draw_line_chart(
-    data_dict: DataCollection,
+    data_dict: Union[List[Tuple[str, np.ndarray]], Dict[str, np.ndarray]],
     init_date: datetime,
     final_date: datetime,
     metadata: Dict[str, Any]
@@ -104,33 +112,31 @@ def draw_line_chart(
 
     max_names_per_graph = metadata.get('max_names_per_graph', 0)
 
-    curves_to_plot = metadata.get('plot_keys')
-    filtered_data_dicts: List[Tuple[str, np.array]]
+    curves_to_plot = metadata.get('plot_keys', [''])
+    if not isinstance(curves_to_plot, list):
+        raise SystemExit('The names to plot should be list of strings')
+    if isinstance(data_dict, dict):
+        data_dict = [(k, v) for k, v in data_dict.items()]
 
-    if curves_to_plot:
-        if metadata.get('plot_total'):
-            curves_to_plot.append('TOTAL')
+    filtered_data_dicts: List[Tuple[str, np.ndarray]]
 
-        filtered_data_dicts = filter_data_to_plot(
-            data_dict,
-            curves_to_plot,
-            max_names_per_graph
-        )
+    if metadata.get('plot_total'):
+        curves_to_plot.append('TOTAL')
 
-    if max_names_per_graph and max_names_per_graph > len(filtered_data_dicts):
-        filtered_data_dicts = sorted(data_dict,
-                                     key=lambda kv: np.sum(kv[1]),
-                                     reverse=True
-                                     )[:max_names_per_graph]
-
-    if not filtered_data_dicts:
-        filtered_data_dicts = [(k, v) for k, v in data_dict]
+    filtered_data_dicts = filter_data_to_plot(
+        sorted(data_dict,
+               key=lambda kv: np.sum(kv[1]),
+               reverse=True
+               )[:max_names_per_graph],
+        curves_to_plot,
+        max_names_per_graph
+    )
 
     if metadata.get('plot_total'):
         ax2 = ax.twinx()
         ax2.set_ylabel('Total')
 
-    delay = len(dates) - len(filtered_data_dicts[0][1][start:final])
+    delay = len(dates) - len(filtered_data_dicts[0][1][start:final])  # type: ignore # noqa
     for name, info in filtered_data_dicts:
         if name == 'TOTAL':
             ax2.xaxis.set_major_locator(locator)
@@ -206,7 +212,7 @@ def draw_barchart(
     plt.box(False)
 
 
-def animate(draw_fun, data_dict: Dict[str, np.array], metadata):
+def animate(draw_fun, data_dict: Dict[str, np.ndarray], metadata):
 
     fig, ax = plt.subplots(figsize=metadata['figsize'])  # (15, 8)
 
@@ -251,7 +257,7 @@ def animate(draw_fun, data_dict: Dict[str, np.array], metadata):
 
 
 def animate_better_barchart(draw_fun,
-                            data_dict: Dict[str, np.array],
+                            data_dict: Dict[str, np.ndarray],
                             metadata: Dict[str, Any]):
     dates = get_dates(Message.initial_date, Message.final_date)
     df = pd.DataFrame.from_dict(data_dict)
@@ -264,7 +270,7 @@ def animate_better_barchart(draw_fun,
                        period_length=metadata['animation']['bcr_period'])
 
 
-def plot_zipf(data: np.array, criteria: str):
+def plot_zipf(data: np.ndarray, criteria: str):
     fig, ax = plt.subplots(constrained_layout=True)
     ax.plot(data[:, 0] * 100, data[:, 1] * 100)
     ax.set_xlabel('% of people')

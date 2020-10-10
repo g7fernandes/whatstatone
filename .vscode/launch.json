@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Main",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/whatstat/main.py",
+            "console": "integratedTerminal",
+            "pythonPath": "${command:python.interpreterPath}",
+        },
+        {
+            "name": "Merger",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/whatstat/merge_chat_files.py",
+            "args": ["chat1.txt",
+                     "chat2.txt",
+                     "-o",
+                     "merged_chat.txt"],
+            "console": "integratedTerminal",
+            "pythonPath": "${command:python.interpreterPath}",
+        }
+    ]
+}

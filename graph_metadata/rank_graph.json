@@ -2,7 +2,7 @@
     "title": "Message Rank",
     "plot_keys": [],
     "figsize": [16, 10],
-    "max_names_per_graph": 8,
+    "max_names_per_graph": 3,
     "background_text" : "",
     "footer": "by @g7fernandes; credit @jburnmurdoch",
     "subtitle": "Some subtitle",

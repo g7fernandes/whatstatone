@@ -84,10 +84,15 @@ class graphBranch:
             self.get_animation(draw_barchart, datas)
 
     def get_animation(self, func, data):
-        if self.graph_metadata['animation']['use_bar_chart_race_package']:
+        # TODO: implement animate line chart
+        anim = self.graph_metadata['animation'].get(
+            'use_bar_chart_race_package')
+        if anim:
             animate_better_barchart(func, data, self.graph_metadata)
-        else:
+        elif anim is not None:
             animate(func, data, self.graph_metadata)
+        else:
+            print('Animate line chart not implemented.')
 
 
 class moving_averageBranch:
@@ -193,7 +198,9 @@ class rankBranch:
     def _get_private_rank(self, tasks: Dict[str, Any]) -> None:
         if len(self.cumulative_arrays) < 2:
             return
-        by_me = tasks.get('sent_received_exchanged', 'exchanged')
+        by_me = tasks.get('sent_received_exchanged')
+        if not by_me:
+            by_me = 'exchanged'
         self.private_ranks = (by_me, rank_private_conversations(
             self.period[0],
             self.period[1],
@@ -205,7 +212,9 @@ class rankBranch:
     def get_graph(self, tasks: Dict[str, Any]) -> None:
         if v_graph := tasks.get('graph'):
             if len(self.cumulative_arrays) > 1:
-                by_me = tasks.get('sent_received_exchanged', 'exchanged')
+                by_me = tasks.get('sent_received_exchanged')
+                if not by_me:
+                    by_me = 'exchanged'
                 v_graph['append_criteria'] = by_me
                 self.graphBranch = graphBranch(
                     join_calendars(self.cumulative_arrays,

@@ -1,6 +1,6 @@
 {
-    "folder_containing_history": "example_group_chat",
-    "my_name": ["Gabriel Fernandes"],
+    "folder_containing_history": "example_private_chats",
+    "my_name": ["person1"],
     "merge_similar_names": false,
     "messages": {
         "conversation_analysis" : {
