@@ -26,6 +26,7 @@ from datetime import datetime
 import csv
 import asyncio
 
+# TODO fix numpy typing
 # TODO maybe this could become GraphQL
 # TODO to facilitate quering, all Branch classes could be derived from some
 # query class
