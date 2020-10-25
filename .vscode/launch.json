@@ -11,6 +11,7 @@
             "program": "${workspaceFolder}/whatstat/main.py",
             "console": "integratedTerminal",
             "pythonPath": "${command:python.interpreterPath}",
+            "args": ["config.json"]
         },
         {
             "name": "Merger",

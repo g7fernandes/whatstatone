@@ -9,7 +9,6 @@ matplotlib = "*"
 progressbar2 = "*"
 pandas = "*"
 bar-chart-race = "*"
-data-science-types = "*"
 
 [dev-packages]
 flake8 = "*"

@@ -1,4 +1,4 @@
-from typing import TextIO, List, Dict
+from typing import TextIO, List, Dict, Tuple
 from datetime import datetime
 import re
 from utils import remove_control_chars, log2console, date2int
@@ -141,7 +141,7 @@ def detect_similar_names(
             log2console('\x1b[0;30;43mMerging.\x1b[0m\n')
             return name
         else:
-            log2console('\x1b[0;30;43mMerging.Not merging.\x1b[0m\n')
+            log2console('\x1b[0;30;43mNot merging.\x1b[0m\n')
             return new_name
     return new_name
 
@@ -162,3 +162,15 @@ def leitor(file: TextIO,
         elif sender:
             people[sender][date2int(date_current)][-1].append_msg(line)
     return people
+
+
+def fit_dates_to_history_time_length(init_date,
+                                     final_date) -> Tuple[datetime, datetime]:
+    if Message.initial_date > init_date:
+        init_date = Message.initial_date
+    if Message.final_date < final_date:
+        final_date = Message.final_date
+    start = (init_date - Message.initial_date).days
+    final = (final_date - Message.initial_date).days
+
+    return (start, final)

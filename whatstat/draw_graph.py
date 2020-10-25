@@ -3,7 +3,7 @@ import matplotlib.dates as mdates
 import matplotlib.ticker as ticker
 import matplotlib
 import numpy as np
-from reader import Message
+from reader import Message, fit_dates_to_history_time_length
 from datetime import datetime, timedelta
 from typing import (List, Dict, Any, Tuple, Union,
                     ItemsView, Iterable, Optional)
@@ -12,6 +12,7 @@ from itertools import cycle
 import progressbar
 import pandas as pd
 import bar_chart_race as bcr
+import os
 
 
 colors = ["#adb0ff", "#ffb3ff", "#90d595", "#e48381",
@@ -27,13 +28,20 @@ def filter_data_to_plot(
 ) -> List[Tuple[str, np.ndarray]]:
     filtered_data: List[Tuple[str, np.ndarray]] = []
 
+    enqueue: List[Tuple[str, np.ndarray]] = []
     if max_number is None:
         max_number = len(keys2plot)
     for k, v in data:
-        if k in keys2plot or abs(max_number) > 0:
+        enqueue.append((k, v))
+        if k in keys2plot:
             if max_number:
                 max_number -= 1
             filtered_data.append((k, v))
+    for k, v in enqueue:
+        if abs(max_number) > 0:
+            if max_number:
+                filtered_data.append((k, v))
+                max_number -= 1
     return filtered_data
 
 
@@ -90,22 +98,46 @@ def draw_weekly_mean(
     ax.grid(True)
 
 
+def get_anex_data(
+    data_dict: Union[List[Tuple[str, np.ndarray]], Dict[str, np.ndarray]]
+) -> Optional[Tuple[datetime, datetime]]:
+    if isinstance(data_dict, dict):
+        for i, (k, v) in enumerate(data_dict.items()):
+            if k == 'init_and_final_times':
+                init_date = v[0]
+                final_date = v[1]
+                data_dict.pop(k)
+                return (init_date, final_date)
+    elif isinstance(data_dict, list):
+        for i, (k, v) in enumerate(data_dict):
+            if k == 'init_and_final_times':
+                init_date = v[0]
+                final_date = v[1]
+                data_dict.pop(i)
+                return (init_date, final_date)
+    return None
+
+
 def draw_line_chart(
     data_dict: Union[List[Tuple[str, np.ndarray]], Dict[str, np.ndarray]],
     init_date: datetime,
     final_date: datetime,
-    metadata: Dict[str, Any]
+    metadata: Dict[str, Any],
+    fig=None,
+    ax=None
 ) -> None:
 
-    # TODO: this code is being repeated > 3 times. Put to in a function
-    if Message.initial_date > init_date:
-        init_date = Message.initial_date
-    if Message.final_date < final_date:
-        final_date = Message.final_date
-    start = (init_date - Message.initial_date).days
-    final = (final_date - Message.initial_date).days
+    anex_data = get_anex_data(data_dict)
+    if anex_data:
+        (init_date, final_date) = anex_data
 
-    fig, ax = plt.subplots(figsize=(15, 8), constrained_layout=True)
+    (start, final) = fit_dates_to_history_time_length(init_date, final_date)
+
+    plt.clf()
+    if not fig or not ax:
+        fig, ax = plt.subplots(figsize=(15, 8))
+    ax.clear()
+
     locator = mdates.AutoDateLocator(minticks=3, maxticks=10)
     formater = mdates.ConciseDateFormatter(locator)
     dates = get_dates(init_date, final_date)
@@ -134,9 +166,10 @@ def draw_line_chart(
 
     if metadata.get('plot_total'):
         ax2 = ax.twinx()
+        ax2.clear()
         ax2.set_ylabel('Total')
 
-    delay = len(dates) - len(filtered_data_dicts[0][1][start:final])  # type: ignore # noqa
+    delay = len(dates[:final]) - len(filtered_data_dicts[0][1][start:final])  # type: ignore # noqa
     for name, info in filtered_data_dicts:
         if name == 'TOTAL':
             ax2.xaxis.set_major_locator(locator)
@@ -212,9 +245,15 @@ def draw_barchart(
     plt.box(False)
 
 
-def animate(draw_fun, data_dict: Dict[str, np.ndarray], metadata):
+def animate(draw_fun,
+            data_dict: Dict[str, np.ndarray],
+            metadata,
+            savedir: str,
+            plot_type: str = 'bar',
+            fargs: Optional[Tuple] = None):
 
     fig, ax = plt.subplots(figsize=metadata['figsize'])  # (15, 8)
+    ax.clear()
 
     color_iter = cycle(colors)
     metadata['association_name_color'] = {
@@ -227,47 +266,67 @@ def animate(draw_fun, data_dict: Dict[str, np.ndarray], metadata):
     data_at_time = []
     day = 0
     for day in range(0, ndays, step):
-        data_at_time.append([(k, v[day]) for k, v in data_dict.items()])
+        if plot_type == 'line':
+            data_at_time.append([
+                (k, v[0:day + 1])
+                for k, v in data_dict.items()
+            ])
+            data_at_time[-1].append(
+                ('init_and_final_times',
+                 [fargs[0], fargs[0] + timedelta(day + 1)])  # type: ignore
+            )
+        else:
+            data_at_time.append([(k, v[day]) for k, v in data_dict.items()])
         metadata['background_text'] = (Message.initial_date
                                        + timedelta(days=day))
 
-    data_at_time = [
-        sorted(data, key=lambda kv:kv[1], reverse=True
-               )[:metadata['max_names_per_graph']] for data in data_at_time
-    ]
-    bar = progressbar.ProgressBar(max_value=len(data_at_time))
+    if plot_type == 'bar':
+        data_at_time = [
+            sorted(
+                data,
+                key=lambda kv:kv[1], reverse=True
+            )[:metadata['max_names_per_graph']] for data in data_at_time
+        ]
+
+    pbar = progressbar.ProgressBar(max_value=len(data_at_time))
     count = [0]
 
     def add_progression_bar(*args):
-        bar.update(count[0])
+        pbar.update(count[0])
         count[0] += 1
         metadata['background_text'] = Message.initial_date + \
             timedelta(days=step * count[0])
         draw_fun(*args, metadata=metadata, fig=fig, ax=ax)
 
-    animator = matplotlib.animation.FuncAnimation(
+    animator = matplotlib.animation.FuncAnimation(  # type: ignore
         fig,
         add_progression_bar,
         frames=data_at_time,
-        interval=int(1000 / metadata['animation']['fps'])
+        interval=int(1000 / metadata['animation']['fps']),
+        fargs=fargs
     )
 
     print("Saving... (may take a while)\n")
-    animator.save(f"{metadata['title']}.mp4", writer="ffmpeg")
+    animator.save(
+        os.path.join(savedir, f'{metadata["title"]}.mp4'),
+        writer="ffmpeg"
+    )
 
 
-def animate_better_barchart(draw_fun,
-                            data_dict: Dict[str, np.ndarray],
-                            metadata: Dict[str, Any]):
+def animate_better_barchart(data_dict: Dict[str, np.ndarray],
+                            metadata: Dict[str, Any],
+                            savedir: str):
     dates = get_dates(Message.initial_date, Message.final_date)
     df = pd.DataFrame.from_dict(data_dict)
     df.index = dates
-    bcr.bar_chart_race(df,
-                       n_bars=metadata['max_names_per_graph'],
-                       steps_per_period=metadata['animation']['fps'],
-                       title=metadata['title'],
-                       filename=f"{metadata['title']}.mp4",
-                       period_length=metadata['animation']['bcr_period'])
+    bcr.bar_chart_race(
+        df,
+        n_bars=metadata['max_names_per_graph'],
+        steps_per_period=metadata['animation']['fps'],
+        title=metadata['title'],
+        filename=os.path.join(savedir, f'{metadata["title"]}.mp4'),
+        period_length=metadata['animation']['bcr_period']
+    )
 
 
 def plot_zipf(data: np.ndarray, criteria: str):

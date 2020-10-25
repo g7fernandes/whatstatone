@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from typing import Any, Dict, List, Tuple, Optional
-from reader import Message, leitor
+from typing import Any, Dict, List, Tuple, Optional, Set
+from reader import Message, leitor, fit_dates_to_history_time_length
 from collector import info_per_hour_day, conversation_starters, TriTuple
 from analysis import (cumulative_calendar,
                       rank_private_conversations,
@@ -21,7 +21,7 @@ import numpy as np
 import os
 import json
 from datetime import timedelta
-from matplotlib.pyplot import show
+import matplotlib.pyplot as plt
 from datetime import datetime
 import csv
 import asyncio
@@ -64,17 +64,11 @@ class graphBranch:
                 self.graph_metadata
             )
         if tasks.get('animate'):
-            self.get_animation(draw_line_chart, datas)
+            self.get_animation(draw_line_chart, datas, (period[0], period[1]))
 
     def get_bar_chart(self, datas: Dict[str, np.array], period, tasks):
         data2graph = []
-        if Message.initial_date > period[0]:
-            period[0] = Message.initial_date
-        if Message.final_date < period[1]:
-            period[1] = Message.final_date
-        start = (period[0] - Message.initial_date).days
-        final = (period[1] - Message.initial_date).days
-
+        (start, final) = fit_dates_to_history_time_length(period[0], period[1])
         for k, v in datas.items():
             data2graph.append((k, v[final] - v[start]))
         draw_barchart(
@@ -84,16 +78,19 @@ class graphBranch:
         if tasks.get('animate'):
             self.get_animation(draw_barchart, datas)
 
-    def get_animation(self, func, data):
+    def get_animation(self, func, data, fargs=None):
         # TODO: implement animate line chart
         anim = self.graph_metadata['animation'].get(
             'use_bar_chart_race_package')
         if anim:
-            animate_better_barchart(func, data, self.graph_metadata)
-        elif anim is not None:
-            animate(func, data, self.graph_metadata)
+            animate_better_barchart(data, self.graph_metadata, reader.dirname)
         else:
-            print('Animate line chart not implemented.')
+            animate(func,
+                    data,
+                    self.graph_metadata,
+                    reader.dirname,
+                    'line',
+                    fargs)
 
 
 class moving_averageBranch:
@@ -117,6 +114,9 @@ class moving_averageBranch:
                     tasks.get('sent_received_exchanged', 'exchanged'),
                     reader.my_name)
             )
+            if not self.moving_average:
+                SystemExit(
+                    'Error! Check if yout name is correct at config file!')
 
         else:
             self.moving_average = get_moving_average(
@@ -395,8 +395,8 @@ class StartersRepliersIgnoredBranch:
             key=lambda kv: kv[1], reverse=False)
 
         i = 1
-        for k, v in percentage_ignored:
-            percentage = (1 - v) * 100
+        for k, ignored_fraction in percentage_ignored:
+            percentage = (1 - ignored_fraction) * 100
             to_return.append(f'{i} - {k} {percentage:,.1f}\n')
             i += 1
 
@@ -419,6 +419,9 @@ class HourlyFrequencyBranch:
             calendar_array,
             metadata.get('sent_received_exchanged', 'exchanged'),
             reader.my_name))
+
+        if not self.mean_by_hour:
+            SystemExit('Error! Check if yout name is correct at config file!')
 
     def draw_hourly_mean_graph(self, metadata: Dict[str, Any]):
         draw_hourly_mean(self.mean_by_hour, metadata)
@@ -652,7 +655,7 @@ class reader:
     messagesBranch: Optional[messagesBranch] = None
     wordsBranch: Optional[wordsBranch] = None
     messages_dicts: List[Dict[str, Dict[int, List[Message]]]] = []
-    history_files: List[str] = []
+    history_files: Set[str] = set()
     my_name: List[str] = []
     path_history_folder = ''
     dirname = ''
@@ -679,8 +682,9 @@ class reader:
         cls.path_history_folder = tasks['folder_containing_history']
         files = [file for file in os.listdir(cls.path_history_folder)
                  if file[-4:] == '.txt' and file not in cls.history_files]
-        if files:
-            cls.history_files = files + cls.history_files
+
+        if files and not any([file in cls.history_files for file in files]):
+            cls.history_files.update(files)
         else:
             return
 
@@ -734,7 +738,7 @@ Results for {cls.path_history_folder}
             file.write(wordsBranch.toFile)
             messagesBranch.toFile = ''
             wordsBranch.toFile = ''
-        show()
+        plt.show()
 
     @classmethod
     async def _write_messages_and_words_statistics(cls):

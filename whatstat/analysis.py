@@ -1,4 +1,4 @@
-from reader import Message
+from reader import Message, fit_dates_to_history_time_length
 from typing import List, Dict, Tuple
 from datetime import datetime
 import numpy as np
@@ -49,12 +49,7 @@ def rank_private_conversations(
     rank: Dict[str, int] = {}
     rank_of_conversation: Dict[str, int] = {}
 
-    if Message.initial_date > init_date:
-        init_date = Message.initial_date
-    if Message.final_date < final_date:
-        final_date = Message.final_date
-    start = (init_date - Message.initial_date).days
-    final = (final_date - Message.initial_date).days
+    (start, final) = fit_dates_to_history_time_length(init_date, final_date)
 
     for cumulative_calendar_dict in cumulative_calendar_dict_list:
         other = ''

@@ -1,5 +1,5 @@
 {
-    "folder_containing_history": "example_private_chats",
+    "folder_containing_history": "example_group_chats",
     "my_name": ["person1"],
     "merge_similar_names": false,
     "messages": {
@@ -26,7 +26,7 @@
                 "force_draw_names": [],
                 "chart_type": "bar",
                 "metadata": "graph_metadata/rank_graph.json",
-                "animate": false
+                "animate": true
             },
             "moving_average": {
                 "sent_received_exchanged": "",
