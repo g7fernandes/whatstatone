@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/whatstat/main.py",
             "console": "integratedTerminal",
-            "pythonPath": "${command:python.interpreterPath}",
+            "python": "${command:python.interpreterPath}",
             "args": ["config.json"]
         },
         {
@@ -23,7 +23,7 @@
                      "-o",
                      "merged_chat.txt"],
             "console": "integratedTerminal",
-            "pythonPath": "${command:python.interpreterPath}",
+            "python": "${command:python.interpreterPath}",
         }
     ]
 }

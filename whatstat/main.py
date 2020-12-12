@@ -9,12 +9,12 @@ import errno
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-        description='Spec To GraphQL Schema parser'
+        description='Whatsapp statistics creator from history files.'
     )
 
     parser.add_argument(
         'config_file',
-        help='The vehicle specification file to parse',
+        help='Settings file with information requested and customizations.',
         default='config.json',
         nargs='?',
         type=str

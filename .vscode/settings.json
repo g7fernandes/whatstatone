@@ -15,5 +15,5 @@
         "editorRuler.foreground": "#222f31"
     },
     "shellcheck.enableQuickFix": true,
-    "python.pythonPath": ".venv/bin/python3.8"
+    "python.pythonPath": ".venv/bin/python"
 }
