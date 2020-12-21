@@ -116,7 +116,7 @@ class moving_averageBranch:
             )
             if not self.moving_average:
                 SystemExit(
-                    'Error! Check if yout name is correct at config file!')
+                    'Error! Check if your name is correct at config file!')
 
         else:
             self.moving_average = get_moving_average(

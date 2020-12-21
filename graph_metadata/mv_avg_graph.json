@@ -1,7 +1,7 @@
 {
     "title": "Moving average of sent messages",
     "plot_keys": [],
-    "figsize": [15, 18],
+    "figsize": [8, 6],
     "max_names_per_graph": 1,
     "plot_total": true,
     "background_text" : "",

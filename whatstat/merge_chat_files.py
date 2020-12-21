@@ -32,23 +32,28 @@ def get_first_date(str_list: List[str]) -> datetime:
 def find_date_index(text_list: List, target: datetime) -> int:
     len_text_list = len(text_list)
     end = len_text_list
-    start = int(end / 2)
+    start = 0
     date: Optional[datetime] = datetime(1970, 1, 1)
+    line = -1
     while target != date:
-        line = start - 1
+        line = int((start + end) / 2) - 1
         date = None
         while not date:
             line += 1
             date = get_datetime(text_list[line].split())
+
             if line > end:
                 return len_text_list
+        dif = end - start
         if date > target:
-            end = start
-            start = int(start / 2)
+            end = line
         elif date < target:
-            start = start + int((end - start) / 2)
+            start = line
         if end == 0:
             return 0
+        if dif == end - start:
+            sys.stdout.write('Warning: missing message at merge point.')
+            return line
     return line
 
 
@@ -57,7 +62,7 @@ def join_chats(chats: List[Tuple[datetime, TextIO]]) -> List[str]:
     for i in range(1, len(chats)):
         last_date = get_last_date(out)
         will_append = list(chats[i][1])
-        line = find_date_index(will_append, last_date)
+        line = find_date_index(will_append, chats[i - 1][0])
         out += will_append[line:]
         sys.stdout.write(f'Merged at date {last_date}\n')
     return out
@@ -66,7 +71,8 @@ def join_chats(chats: List[Tuple[datetime, TextIO]]) -> List[str]:
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
-        description='Spec To GraphQL Schema parser'
+        description=('Merge two chats of the same conversation that cover'
+                     'different times.')
     )
 
     parser.add_argument(

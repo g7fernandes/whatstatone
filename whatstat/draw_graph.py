@@ -96,6 +96,7 @@ def draw_weekly_mean(
         ax.plot(days, np.concatenate((v[6:7], v, v[0:1])), label=k)
     ax.legend()
     ax.grid(True)
+    plt.show()
 
 
 def get_anex_data(
@@ -170,6 +171,8 @@ def draw_line_chart(
         ax2.set_ylabel('Total')
 
     delay = len(dates[:final]) - len(filtered_data_dicts[0][1][start:final])  # type: ignore # noqa
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formater)
     for name, info in filtered_data_dicts:
         if name == 'TOTAL':
             ax2.xaxis.set_major_locator(locator)
